@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import api from '@/lib/api';
+import Link from 'next/link';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -86,6 +87,11 @@ export default function LoginPage() {
                 >
                     {loading ? 'Entrando...' : 'Entrar'}
                 </button>
+
+                    <Link href="/usuarios/newusers" className="block text-center text-sm text-yellow-500 hover:underline mt-4">
+                        Não possui uma conta? Cadastre-se aqui.
+                    </Link>
+
             </form>
 
             <div className="mt-10 text-sm text-gray-500">
