@@ -45,10 +45,9 @@ export default function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps
 
         // Mapeia cargo_id para nomes de cargo
         const cargoMap: { [key: number]: string } = {
-            1: 'Administrador',
-            2: 'Gerente',
-            3: 'Mecânico',
-            4: 'Recepcionista'
+            1: 'Proprietário/Mecânico',
+            2: 'Recepcionista',
+            3: 'Mecânico Funcionário',
         };
 
         return user.cargo_id ? cargoMap[user.cargo_id] || 'Usuário' : 'Usuário';

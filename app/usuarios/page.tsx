@@ -1,5 +1,6 @@
 // app/usuarios/page.tsx
 import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import ViewUsers from '@/components/UserForm/ViewUsers';
 import api from '@/lib/api';
 
@@ -8,12 +9,9 @@ export default async function UsuariosPage() {
     const token = cookieStore.get('token')?.value;
 
     if (!token) {
-        // Redireciona do lado do servidor
-        return (
-            <meta httpEquiv="refresh" content="0;url=/login" />
-        );
+        redirect('/login');
     }
-
+    
     try {
         const [usersRes, cargosRes] = await Promise.all([
             api.get('/usuarios', {
@@ -25,13 +23,30 @@ export default async function UsuariosPage() {
         ]);
 
         return (
-            <ViewUsers usuario={usersRes.data} cargo={cargosRes.data} />
+            <ViewUsers 
+                usuario={usersRes.data} 
+                cargo={cargosRes.data} 
+            />
         );
-    } catch (error) {
+    } catch (error: any) {
         console.error('Erro ao carregar dados:', error);
+        
+        // Se for erro 401, redireciona para login
+        if (error.response?.status === 401) {
+            redirect('/login');
+        }
+        
         return (
-            <div className="p-6 text-red-500">
-                Erro ao carregar os dados de usuários ou cargos.
+            <div className="p-6">
+                <div className="text-red-500 mb-4">
+                    Erro ao carregar os dados: {error.response?.data?.message || error.message}
+                </div>
+                <button 
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                >
+                    Tentar Novamente
+                </button>
             </div>
         );
     }

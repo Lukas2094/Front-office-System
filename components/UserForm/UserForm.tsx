@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import Link from 'next/link';
 
 interface Cargo {
     id: number;
@@ -112,6 +113,11 @@ export default function UserForm({ cargos }: UserFormProps) {
             >
                 Salvar
             </button>
+
+
+            <Link href="/login" className="block text-center mt-4 text-blue-600 hover:underline">
+                Já possui uma conta? Faça login
+            </Link>
         </form>
     );
 }

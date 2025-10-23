@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '@/lib/api';
 
 interface Props {
@@ -21,6 +21,8 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
     const [ativo, setAtivo] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const didFetch = useRef(false);
+
     const token =
         typeof window !== 'undefined'
             ? document.cookie
@@ -29,51 +31,53 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
                 ?.split('=')[1]
             : '';
 
-    useEffect(() => {
+        useEffect(() => {
+
+            if (didFetch.current) return;   
+            didFetch.current = true;
         async function fetchData() {
             try {
-                const [userRes] = await Promise.all([
-                    api.get(`/usuarios/${id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }),
-        
-                ]);
-                const user = userRes.data;
-                setUsername(user?.username ?? '');
-                setCargoId(user?.cargo_id ?? user?.cargo?.id ?? '');
-                setAtivo(Boolean(user?.ativo));
+            const userRes = await api.get(`/usuarios/${id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const user = userRes.data;
+            setUsername(user?.username ?? '');
+            setCargoId(user?.cargo_id ?? user?.cargo?.id ?? '');
+            setAtivo(Boolean(user?.ativo));
             } catch (err) {
-                console.error('Erro ao buscar dados do usuário:', err);
+            console.error('Erro ao buscar dados do usuário:', err);
             }
         }
 
         fetchData();
-    }, [id, token]);
+        }, [id, token]);
+
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
 
         try {
-            await api.patch(
-                `/usuarios/${id}`,
-                {
-                    username,
-                    cargo_id: cargoId ? Number(cargoId) : null,
-                    ativo,
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                }
-            );
+            const payload: any = {
+                username: username.trim(),
+                ativo,
+                cargo_id: cargoId !== '' ? Number(cargoId) : undefined,
+            };
+
+            await api.patch(`/usuarios/${id}`, payload, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
             onUpdated();
-        } catch (err) {
-            console.error('Erro ao atualizar usuário:', err);
-            alert('Erro ao atualizar usuário.');
+            onClose();
+        } catch (err: any) {
+            console.error('Erro ao atualizar usuário:', err.response?.data || err.message);
+            alert(err.response?.data?.message || 'Erro ao atualizar usuário.');
         } finally {
             setLoading(false);
         }
     }
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
