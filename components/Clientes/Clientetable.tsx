@@ -80,7 +80,7 @@ export default function ClienteTable({ clientes }: ClienteTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full border-collapse text-sm text-gray-700">
           <thead>
-            <tr className="bg-gradient-to-r from-blue-50 to-blue-100 text-gray-700 uppercase text-xs tracking-wider">
+            <tr className="bg-linear-to-r from-blue-50 to-blue-100 text-gray-700 uppercase text-xs tracking-wider">
               <th className="p-3 text-left rounded-tl-lg">ID</th>
               <th className="p-3 text-left">Nome</th>
               <th className="p-3 text-left">Tipo</th>
