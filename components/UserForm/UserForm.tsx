@@ -17,9 +17,10 @@ interface UserFormProps {
 export default function UserForm({ cargos }: UserFormProps) {
     const router = useRouter();
     const [form, setForm] = useState({
-        username: '', // antes era nome
+        nome: '',
+        username: '',
         email: '',
-        senha: '', // antes era senha
+        senha: '',
         cargo_id: '',
         ativo: true,
     });
@@ -31,6 +32,7 @@ export default function UserForm({ cargos }: UserFormProps) {
 
         try {
             const payload = {
+                nome: form.username.trim(),
                 username: form.username.trim(),
                 email: form.email.trim(),
                 senha: form.senha.trim(),
@@ -56,9 +58,18 @@ export default function UserForm({ cargos }: UserFormProps) {
 
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-            <input
+             <input
                 type="text"
                 placeholder="Nome de usuário"
+                value={form.nome}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                required
+                className="border p-2 w-full mb-3 rounded"
+            />
+
+            <input
+                type="text"
+                placeholder="NickName do usuário"
                 value={form.username}
                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                 required

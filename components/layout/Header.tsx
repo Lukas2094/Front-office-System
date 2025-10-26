@@ -33,8 +33,8 @@ export default function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps
 
     const getUserDisplayName = () => {
         if (!user) return 'Usuário';
-        const username = user.username;
-        return username
+        const nome = user.nome;
+        return nome
             .split('.')
             .map(part => part.charAt(0).toUpperCase() + part.slice(1))
             .join(' ');
@@ -142,7 +142,7 @@ export default function Header({ onMenuClick, title = 'Dashboard' }: HeaderProps
                                 <div className="p-2">
                                     <div className="px-3 py-2 border-b border-gray-100">
                                         <p className="text-sm font-medium text-gray-900">{getUserDisplayName()}</p>
-                                        <p className="text-xs text-gray-600 truncate">{user?.username}</p>
+                                        <p className="text-xs text-gray-600 truncate">{user?.nome}</p>
                                         <p className="text-xs text-gray-500">{getUserRole()}</p>
                                     </div>
 

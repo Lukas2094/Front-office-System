@@ -16,8 +16,10 @@ interface NewUserModalProps {
 
 export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalProps) {
     const [formData, setFormData] = useState({
+        nome: '',
         username: '',
         senha: '',
+        email: '',
         cargo_id: '',
         ativo: true,
     });
@@ -84,6 +86,20 @@ export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalPr
                 <h2 className="text-xl font-semibold mb-4">Novo Usuário</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Nome</label>
+                        <input
+                            type="text"
+                            name="nome"
+                            value={formData.nome}
+                            onChange={handleChange}
+                            placeholder='Insira o nome do usuário'
+                            required
+                            className="w-full border rounded px-3 py-2 mt-1 focus:ring focus:ring-blue-300 outline-none"
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Username</label>
                         <input
@@ -91,6 +107,20 @@ export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalPr
                             name="username"
                             value={formData.username}
                             onChange={handleChange}
+                            placeholder='Insira o Nickname de Login do usuário'
+                            required
+                            className="w-full border rounded px-3 py-2 mt-1 focus:ring focus:ring-blue-300 outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <input
+                            type="text"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleChange}
+                            placeholder='Insira um email válido'
                             required
                             className="w-full border rounded px-3 py-2 mt-1 focus:ring focus:ring-blue-300 outline-none"
                         />
@@ -103,6 +133,7 @@ export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalPr
                             name="senha"
                             value={formData.senha}
                             onChange={handleChange}
+                            placeholder='Insira uma senha segura'
                             required
                             className="w-full border rounded px-3 py-2 mt-1 focus:ring focus:ring-blue-300 outline-none"
                         />

@@ -18,6 +18,7 @@ interface Cargo {
 export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) {
     const [username, setUsername] = useState('');
     const [cargoId, setCargoId] = useState<number | ''>('');
+    const [ email , setEmail ] = useState('');
     const [ativo, setAtivo] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -42,6 +43,7 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
             });
             const user = userRes.data;
             setUsername(user?.username ?? '');
+            setEmail(user?.email ?? '');
             setCargoId(user?.cargo_id ?? user?.cargo?.id ?? '');
             setAtivo(Boolean(user?.ativo));
             } catch (err) {
@@ -60,6 +62,7 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
         try {
             const payload: any = {
                 username: username.trim(),
+                email: email.trim(),
                 ativo,
                 cargo_id: cargoId !== '' ? Number(cargoId) : undefined,
             };
@@ -95,6 +98,18 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
                             required
                         />
                     </div>
+
+                    <div>
+                        <label className="block mb-1 text-sm font-medium">Email Usuário</label>
+                        <input
+                            type="text"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="border w-full p-2 rounded"
+                            required
+                        />
+                    </div>
+
 
                     <div>
                         <label className="block mb-1 text-sm font-medium">Cargo</label>

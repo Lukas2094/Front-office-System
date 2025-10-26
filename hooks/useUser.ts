@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 
 interface UserData {
     sub: number;
+    nome: string;
     username: string;
     funcionario_id: number | null;
     cargo_id: number | null;
