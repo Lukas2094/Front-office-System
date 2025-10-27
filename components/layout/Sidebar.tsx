@@ -146,7 +146,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                 </div>
 
                 {/* User Info */}
-                {isSidebarExpanded && user && (
+                {/* {isSidebarExpanded && user && (
                     <div className="px-4 py-4 border-b border-gray-700">
                         <div className="flex items-center space-x-3 p-3 bg-gray-800/50 rounded-xl">
                             <div className={`w-10 h-10 ${getRoleColor()} rounded-lg flex items-center justify-center shadow-md`}>
@@ -164,7 +164,7 @@ export default function Sidebar({ isOpen, onToggle }: SidebarProps) {
                             </div>
                         </div>
                     </div>
-                )}
+                )} */}
 
                 {/* Menu */}
                 <nav
