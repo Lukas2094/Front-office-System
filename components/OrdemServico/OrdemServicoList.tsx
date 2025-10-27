@@ -23,9 +23,9 @@ export default function OrdemServicoList({ initialData }: { initialData: OrdemSe
   const [selectedOrdem, setSelectedOrdem] = useState<OrdemServico | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('todos');
+  const socket = getSocket('/ordens');
 
   useEffect(() => {
-    const socket = getSocket('/ordens');
 
     socket.on('ordemCriada', (ordem: OrdemServico) => {
       setOrdens((prev) => [ordem, ...prev]);
@@ -39,8 +39,20 @@ export default function OrdemServicoList({ initialData }: { initialData: OrdemSe
       setOrdens((prev) => prev.map((o) => (o.id === ordem.id ? ordem : o)));
     });
 
+    socket.on('connect', () => {
+      console.log('✅ WebSocket /ordens CONECTADO');
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('❌ WebSocket /ordens DESCONECTADO:', reason);
+    });
+
     return () => {
-      socket.disconnect();
+      socket.off('ordemCriada');
+      socket.off('ordemAtualizada');
+      socket.off('ordemFaturada');
+      socket.off('connect');
+      socket.off('disconnect');
     };
   }, []);
 
