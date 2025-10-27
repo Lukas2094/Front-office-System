@@ -102,7 +102,7 @@ export default function EditUserModal({ id, onClose, onUpdated, cargo }: Props) 
                         </div>
                         <button
                             onClick={onClose}
-                            className="w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+                            className="w-8 h-8 cursor-pointer rounded-lg bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
                         >
                             <FiX size={18} />
                         </button>
