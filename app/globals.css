@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.fc-event.custom-mirror {
+  background: linear-gradient(to right, #22c55e, #16a34a) !important;
+  color: white !important;
+  border-radius: 6px !important;
+  padding: 4px 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transform: none !important;
+  transition: none !important;
+}
