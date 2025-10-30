@@ -6,16 +6,14 @@ import { usePathname } from 'next/navigation';
 import {
     FiHome,
     FiUsers,
-    FiTruck,
     FiFileText,
     FiCalendar,
     FiChevronLeft,
     FiChevronRight,
     FiTool,
     FiLogOut,
-    FiUser,
-    FiSettings
 } from 'react-icons/fi';
+import { TbReportSearch } from "react-icons/tb";
 import { useUser } from '@/hooks/useUser';
 
 interface SidebarProps {
@@ -38,6 +36,7 @@ const allMenuItems: MenuItem[] = [
     { icon: FiFileText, label: 'Ordens Serviço', href: '/ordens-servico', color: 'text-orange-400', roles: [1, 2, 3] },
     { icon: FiCalendar, label: 'Agendamentos', href: '/agendamentos', color: 'text-pink-400', roles: [1, 2] },
     { icon: FiUsers, label: 'Usuários', href: '/usuarios', color: 'text-cyan-400', roles: [1] },
+    { icon: TbReportSearch, label: 'Relatórios', href: '/relatorios', color: 'text-purple-400', roles: [1, 2] },
 ];
 
 export default function Sidebar({ isOpen, onToggle }: SidebarProps) {

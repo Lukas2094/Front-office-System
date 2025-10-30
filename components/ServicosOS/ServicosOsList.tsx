@@ -5,6 +5,8 @@ import api from '@/lib/api';
 import { FiEdit, FiTrash2, FiPlus, FiTool, FiPackage, FiDollarSign, FiList } from 'react-icons/fi';
 import ServicoOsModal from './ServicoOsModal';
 import { getSocket } from '@/lib/websocket';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface ServicoOs {
     id: number;
@@ -21,39 +23,38 @@ export default function ServicosOsList({ ordemId }: { ordemId: number }) {
     const [contagem, setContagem] = useState({ servicos: 0, pecas: 0 });
     const [modalData, setModalData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [ordem, setOrdem] = useState<any>(null);
 
     // CORREÇÃO: Ref para controlar se já está escutando WebSocket
     const isListeningRef = useRef(false);
     const loadDataTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const loadData = async () => {
-        const callId = Math.random().toString(36).substring(7);
-
         setLoading(true);
         try {
+            // Buscar serviços
             const response = await api.get(`/servicos-os/ordem/${ordemId}`);
             setServicos(response.data);
 
-            // Calcular totais localmente
+            // Buscar dados da ordem de serviço (cliente, veículo, etc.)
+            const ordemRes = await api.get(`/ordens-servico/${ordemId}`);
+            setOrdem(ordemRes.data);
+
+            // Calcular totais
             const novoTotal = response.data.reduce((acc: number, servico: ServicoOs) => {
                 return acc + (servico.quantidade * servico.valor_unitario);
             }, 0);
 
             const novaContagem = response.data.reduce((acc: any, servico: ServicoOs) => {
-                if (servico.tipo === 'servico') {
-                    acc.servicos += 1;
-                } else {
-                    acc.pecas += 1;
-                }
+                if (servico.tipo === 'servico') acc.servicos += 1;
+                else acc.pecas += 1;
                 return acc;
             }, { servicos: 0, pecas: 0 });
 
             setTotal(novoTotal);
             setContagem(novaContagem);
-
-
         } catch (error) {
-            console.error(`❌ [${callId}] Erro no loadData:`, error);
+            console.error('Erro no loadData:', error);
         } finally {
             setLoading(false);
         }
@@ -196,6 +197,60 @@ export default function ServicosOsList({ ordemId }: { ordemId: number }) {
         );
     }
 
+
+    const handleExportarPDF = () => {
+        if (servicos.length === 0) {
+            alert("Nenhum item para exportar!");
+            return;
+        }
+
+        const doc = new jsPDF();
+
+        // Cabeçalho
+        doc.setFontSize(16);
+        doc.text(`OS #${ordemId}`, 14, 20);
+        doc.setFontSize(12);
+        doc.text(`Relatório de Serviços e Peças`, 14, 28);
+
+        // Tabela
+        autoTable(doc, {
+            startY: 35,
+            head: [['Descrição', 'Tipo', 'Qtd', 'Valor Unit.', 'Total']],
+            body: servicos.map(s => [
+                s.descricao,
+                s.tipo === 'servico' ? 'Serviço' : 'Peça',
+                s.quantidade,
+                formatCurrency(s.valor_unitario),
+                formatCurrency(s.quantidade * s.valor_unitario)
+            ]),
+            styles: {
+                fontSize: 10,
+                cellPadding: 4,
+            },
+            headStyles: {
+                fillColor: [66, 135, 245],
+                textColor: 255,
+                halign: 'center'
+            },
+            columnStyles: {
+                0: { cellWidth: 60 },
+                1: { halign: 'center' },
+                2: { halign: 'center' },
+                3: { halign: 'right' },
+                4: { halign: 'right' }
+            }
+        });
+
+        // Total geral no final
+        const finalY = (doc as any).lastAutoTable.finalY + 10;
+        doc.setFontSize(12);
+        doc.text(`Total Geral: ${formatCurrency(total)}`, 14, finalY);
+
+        // Baixar o arquivo
+        doc.save(`OS_${ordemId}_servicos.pdf`);
+    };
+
+
     return (
         <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             {/* Header */}
@@ -217,6 +272,14 @@ export default function ServicosOsList({ ordemId }: { ordemId: number }) {
                     >
                         <FiPlus className="mr-2 w-4 h-4" />
                         <span>Adicionar Item</span>
+                    </button>
+
+                    <button
+                        onClick={handleExportarPDF}
+                        className="flex items-center justify-center bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white px-6 py-2.5 rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl cursor-pointer"
+                    >
+                        <FiDollarSign className="mr-2 w-4 h-4" />
+                        <span>Exportar PDF</span>
                     </button>
                 </div>
             </div>
