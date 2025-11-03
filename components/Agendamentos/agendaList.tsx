@@ -48,6 +48,78 @@ const Toast = ({ message, type, onClose }: { message: string; type: 'success' | 
     );
 };
 
+// Funções simplificadas para validação de data/hora
+const isDateTimeInPast = (dateTime: Date): boolean => {
+    // Usa moment.js para comparação direta considerando o timezone local
+    const selectedMoment = moment(dateTime);
+    const nowMoment = moment();
+    return selectedMoment.isBefore(nowMoment);
+};
+
+const isSameDay = (date1: Date, date2: Date): boolean => {
+    const moment1 = moment(date1);
+    const moment2 = moment(date2);
+    return moment1.isSame(moment2, 'day');
+};
+
+const getCurrentBrasilDateTime = (): Date => {
+    // Retorna a data/hora atual no timezone local (que deve ser PT-BR)
+    return new Date();
+};
+
+// Função para verificar se é um horário válido para agendamento
+const isValidAppointmentTime = (start: Date, end: Date): { isValid: boolean; message: string } => {
+    const now = getCurrentBrasilDateTime();
+    const startMoment = moment(start);
+    const nowMoment = moment(now);
+
+    // Verifica se está no passado
+    if (startMoment.isBefore(nowMoment)) {
+        return {
+            isValid: false,
+            message: 'Não é possível agendar em datas/horários passados.'
+        };
+    }
+
+    // Verifica se é hoje
+    if (isSameDay(start, now)) {
+        const minutesDifference = startMoment.diff(nowMoment, 'minutes');
+
+        // Para agendamentos de hoje, requer pelo menos 30 minutos de antecedência
+        if (minutesDifference < 30) {
+            return {
+                isValid: false,
+                message: `Para agendamentos de hoje, é necessário pelo menos 30 minutos de antecedência. 
+                         Horário atual: ${nowMoment.format('HH:mm')} 
+                         Horário selecionado: ${startMoment.format('HH:mm')}`
+            };
+        }
+    }
+
+    // Verifica horário comercial (8:00 às 18:00)
+    const startHour = start.getHours();
+    const startMinute = start.getMinutes();
+    const totalStartMinutes = startHour * 60 + startMinute;
+
+    if (totalStartMinutes < 8 * 60 || totalStartMinutes >= 18 * 60) {
+        return {
+            isValid: false,
+            message: 'Agendamentos apenas permitidos no horário comercial (8:00 às 18:00).'
+        };
+    }
+
+    // Verifica se é final de semana
+    const dayOfWeek = start.getDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+        return {
+            isValid: false,
+            message: 'Agendamentos apenas permitidos de segunda a sexta-feira.'
+        };
+    }
+
+    return { isValid: true, message: '' };
+};
+
 export default function AgendamentosList({ initialAgendamentos, initialClientes, initialFuncionarios }: any) {
     const [agendamentos, setAgendamentos] = useState<any[]>(initialAgendamentos || []);
     const [cliente, setClientes] = useState<any[]>(initialClientes || []);
@@ -86,8 +158,6 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
             const { data } = await api.get('/agendamentos', {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
-
-            // ✅ Garante novo array e rerender no React
             setAgendamentos([...data]);
         } catch (error) {
             console.error('Erro ao carregar agendamentos:', error);
@@ -121,13 +191,24 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
 
     const handleDateSelect = (selectInfo: any) => {
         const start = new Date(selectInfo.startStr);
-        const now = new Date();
+        const end = new Date(selectInfo.endStr);
 
-        // if (start < now) {
-        //     addToast('Só é permitido agendar a partir de agora.', 'warning');
-        //     return;
-        // }
+        console.log('Data selecionada:', {
+            startStr: selectInfo.startStr,
+            start: start.toString(),
+            startLocal: start.toLocaleString('pt-BR'),
+            now: new Date().toLocaleString('pt-BR')
+        });
 
+        // Valida o horário selecionado
+        const validation = isValidAppointmentTime(start, end);
+
+        if (!validation.isValid) {
+            addToast(validation.message, 'warning');
+            return;
+        }
+
+        // Se passou em todas as validações, abre o modal
         setModalData({
             start: selectInfo.startStr,
             end: selectInfo.endStr,
@@ -138,11 +219,13 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
     const handleEventDrop = async (changeInfo: any) => {
         const id = Number(changeInfo.event.id);
         const newDate = changeInfo.event.start;
-        const now = new Date();
+        const now = getCurrentBrasilDateTime();
 
-        // Verifica se a nova data é no passado
-        if (newDate < now) {
-            addToast('Não é possível mover agendamentos para datas/horários passados.', 'warning');
+        // Valida o novo horário
+        const validation = isValidAppointmentTime(newDate, newDate);
+
+        if (!validation.isValid) {
+            addToast(validation.message, 'warning');
             changeInfo.revert();
             return;
         }
@@ -250,53 +333,6 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
         }
     };
 
-    // CORREÇÃO: Função para formatar data e hora para exibição
-    const formatEventTime = (startStr: string, endStr: string) => {
-        try {
-            const start = new Date(startStr);
-            const end = new Date(endStr);
-
-            // Verifica se as datas são válidas
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-                return 'Horário indisponível';
-            }
-
-            const formatTime = (date: Date) => {
-                return date.toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
-            };
-
-            return `${formatTime(start)} - ${formatTime(end)}`;
-        } catch (error) {
-            console.error('Erro ao formatar horário:', error);
-            return 'Horário indisponível';
-        }
-    };
-
-    // CORREÇÃO: Função para formatar data completa
-    const formatEventDate = (dateStr: string) => {
-        try {
-            const date = new Date(dateStr);
-
-            // Verifica se a data é válida
-            if (isNaN(date.getTime())) {
-                return 'Data indisponível';
-            }
-
-            return date.toLocaleDateString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        } catch (error) {
-            console.error('Erro ao formatar data:', error);
-            return 'Data indisponível';
-        }
-    };
-
     // CORREÇÃO: Estatísticas atualizadas em tempo real
     const stats = {
         total: agendamentos.length,
@@ -363,6 +399,27 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                 </div>
             </div>
 
+            {/* Informações de Horário */}
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                        <FiClock className="w-5 h-5 text-blue-600" />
+                        <div>
+                            <h3 className="font-semibold text-blue-800 text-sm">Horário de Funcionamento</h3>
+                            <p className="text-blue-600 text-sm">Segunda a Sexta: 8:00 às 18:00</p>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-blue-600 text-sm font-medium">
+                            Hoje: {moment().format('DD/MM/YYYY HH:mm')}
+                        </p>
+                        <p className="text-blue-600 text-xs">
+                            Agendamentos de hoje precisam de 30min de antecedência
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Calendário Premium - CONFIGURAÇÕES CORRIGIDAS */}
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-gray-200/60 backdrop-blur-sm">
                 {loading ? (
@@ -409,8 +466,8 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                         eventClassNames="cursor-pointer rounded-lg border-l-4 shadow-sm transition-all duration-200"
                         // CORREÇÃO: Custom event content corrigido
                         eventContent={(eventInfo) => {
-                            const start = eventInfo.event.start ? moment(eventInfo.event.start).utcOffset(-180) : null;
-                            const end = eventInfo.event.end ? moment(eventInfo.event.end).utcOffset(-180) : null;
+                            const start = eventInfo.event.start ? moment(eventInfo.event.start) : null;
+                            const end = eventInfo.event.end ? moment(eventInfo.event.end) : null;
                             const funcionario = eventInfo.event.extendedProps?.funcionario?.nome ?? 'Sem funcionário';
 
                             const startStr = start ? start.format('HH:mm') : '';

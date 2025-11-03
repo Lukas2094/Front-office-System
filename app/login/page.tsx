@@ -137,6 +137,17 @@ export default function LoginPage() {
                                 </span>
                             </Link>
                         </div>
+
+                        <div className="text-center pt-2">
+                            <Link 
+                                href="/usuarios/reset-password" 
+                                className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600 transition-colors"
+                            >
+                                <span className="font-semibold text-blue-600 hover:text-blue-700">
+                                    Esqueceu a senha?
+                                </span>
+                            </Link>
+                        </div>        
                     </form>
 
                     {/* Footer */}

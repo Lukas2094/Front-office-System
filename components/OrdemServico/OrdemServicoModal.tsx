@@ -110,8 +110,8 @@ export default function OrdemServicoModal({ onClose, onSaved, ordem }: OrdemServ
         console.log('📤 WebSocket: updateOrdem emitido');
 
       } else {
-        response = await api.post('/ordens-servico', payload);
-        console.log('✅ Ordem criada:', response.data);
+        // response = await api.post('/ordens-servico', payload);
+        // console.log('✅ Ordem criada:', response.data);
 
         const socket = getSocket('/ordens');
         socket.emit('createOrdem', payload);
