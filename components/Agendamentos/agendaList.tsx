@@ -81,20 +81,36 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
     };
 
     const fetchAgendamentos = async () => {
+        setLoading(true);
         try {
             const { data } = await api.get('/agendamentos', {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
-            setAgendamentos(data);
+
+            // ✅ Garante novo array e rerender no React
+            setAgendamentos([...data]);
+        } catch (error) {
+            console.error('Erro ao carregar agendamentos:', error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        socket.on('agendamento:created', fetchAgendamentos);
-        socket.on('agendamento:updated', fetchAgendamentos);
-        socket.on('agendamento:deleted', fetchAgendamentos);
+        socket.on('agendamento:created', async () => {
+            await fetchAgendamentos();
+            calendarRef.current?.getApi().refetchEvents();
+        });
+
+        socket.on('agendamento:updated', async () => {
+            await fetchAgendamentos();
+            calendarRef.current?.getApi().refetchEvents();
+        });
+
+        socket.on('agendamento:deleted', async () => {
+            await fetchAgendamentos();
+            calendarRef.current?.getApi().refetchEvents();
+        });
 
         return () => {
             socket.off('agendamento:created');
@@ -177,7 +193,7 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
             y >= trashRect.top &&
             y <= trashRect.bottom
         ) {
-            const id = info.event.id;
+            const id = Number(info.event.id);
             const eventTitle = info.event.title;
 
             if (window.confirm(`Deseja realmente excluir o agendamento "${eventTitle}"?`)) {
@@ -189,19 +205,25 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
         }
     };
 
-    // Função separada para deletar agendamento
+    // CORREÇÃO: Função melhorada para deletar agendamento
     const handleDeleteAgendamento = async (id: number) => {
         try {
             await api.delete(`/agendamentos/${id}`, {
                 headers: { Authorization: `Bearer ${getToken()}` },
             });
+
+            // ✅ ATUALIZAÇÃO CRÍTICA: Remove o agendamento do estado local
+            setAgendamentos(prev => prev.filter(ag => ag.id !== id));
+
+            // ✅ Emite o evento WebSocket
             socket.emit('agendamento:deleted', id);
 
-            // Atualiza a lista localmente
-            setAgendamentos(prev => prev.filter(ag => ag.id !== id));
+            // ✅ Força o recarregamento do calendário
+            calendarRef.current?.getApi().refetchEvents();
 
             addToast('Agendamento excluído com sucesso!', 'success');
         } catch (error) {
+            console.error('Erro ao excluir agendamento:', error);
             addToast('Erro ao excluir agendamento.', 'error');
         }
     };
@@ -275,7 +297,7 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
         }
     };
 
-    // Estatísticas
+    // CORREÇÃO: Estatísticas atualizadas em tempo real
     const stats = {
         total: agendamentos.length,
         pendentes: agendamentos.filter(a => a.status === 'pendente').length,
@@ -318,7 +340,7 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                         </div>
                     </div>
 
-                    {/* Cards de Estatísticas */}
+                    {/* Cards de Estatísticas - ATUALIZADOS EM TEMPO REAL */}
                     <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
                         {[
                             { label: 'Total', value: stats.total, color: 'blue', icon: FiCalendar },
@@ -357,31 +379,9 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                         initialView="timeGridWeek"
                         selectable={true}
                         editable={true}
-                        events={toCalendarEvents(agendamentos)}
+                        events={[...toCalendarEvents(agendamentos)]}
                         eventDrop={handleEventDrop}
-                            eventDragStart={(info) => {
-                                setDragging(true);
-
-                                // ⚙️ Personaliza o clone que segue o mouse
-                                const mirrorEl: any = document.querySelector('.fc-event.fc-mirror');
-                                if (mirrorEl) {
-                                    mirrorEl.classList.add('custom-mirror');
-                                    mirrorEl.style.opacity = '0.95';
-                                    mirrorEl.style.cursor = 'grabbing';
-                                    mirrorEl.style.position = 'fixed';
-                                    mirrorEl.style.pointerEvents = 'none';
-                                    mirrorEl.style.zIndex = '9999';
-                                }
-
-                                // Atualiza posição do clone seguindo o mouse
-                                document.addEventListener('mousemove', (e) => {
-                                    const mirror = document.querySelector('.custom-mirror') as HTMLElement;
-                                    if (mirror) {
-                                        mirror.style.left = `${e.clientX + 10}px`;
-                                        mirror.style.top = `${e.clientY + 10}px`;
-                                    }
-                                });
-                            }}
+                        eventDragStart={handleEventDragStart}
                         eventDragStop={handleEventDragStop}
                         select={handleDateSelect}
                         eventClick={handleEventClick}
@@ -408,32 +408,31 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                         // CORREÇÃO: Remove hover branco dos eventos
                         eventClassNames="cursor-pointer rounded-lg border-l-4 shadow-sm transition-all duration-200"
                         // CORREÇÃO: Custom event content corrigido
-                            eventContent={(eventInfo) => {
-                                const start = eventInfo.event.start ? moment(eventInfo.event.start).utcOffset(-180) : null;
-                                const end = eventInfo.event.end ? moment(eventInfo.event.end).utcOffset(-180) : null;
-                                const funcionario = eventInfo.event.extendedProps?.funcionario?.nome ?? 'Sem funcionário';
+                        eventContent={(eventInfo) => {
+                            const start = eventInfo.event.start ? moment(eventInfo.event.start).utcOffset(-180) : null;
+                            const end = eventInfo.event.end ? moment(eventInfo.event.end).utcOffset(-180) : null;
+                            const funcionario = eventInfo.event.extendedProps?.funcionario?.nome ?? 'Sem funcionário';
 
-                                const startStr = start ? start.format('HH:mm') : '';
-                                const endStr = end ? end.format('HH:mm') : '';
+                            const startStr = start ? start.format('HH:mm') : '';
+                            const endStr = end ? end.format('HH:mm') : '';
 
-                                return (
-                                    <div className="p-1 w-full h-full flex flex-col justify-center bg-gradient-to-r from-green-500 to-green-600 rounded-md shadow-md text-white">
-                                        <div className="font-semibold text-xs leading-tight mb-0.5">
-                                            {eventInfo.event.title}
-                                        </div>
-                                        <div className="text-[10px] italic opacity-90 mb-0.5">
-                                            {funcionario}
-                                        </div>
-                                        <div className="text-xs leading-tight">
-                                            {`${startStr} - ${endStr}`}
-                                            <div className="text-[10px] mt-0.5">
-                                                {start ? start.format('DD/MM/YYYY') : ''}
-                                            </div>
+                            return (
+                                <div className="p-1 w-full h-full flex flex-col justify-center bg-gradient-to-r from-green-500 to-green-600 rounded-md shadow-md text-white">
+                                    <div className="font-semibold text-xs leading-tight mb-0.5">
+                                        {eventInfo.event.title}
+                                    </div>
+                                    <div className="text-[10px] italic opacity-90 mb-0.5">
+                                        {funcionario}
+                                    </div>
+                                    <div className="text-xs leading-tight">
+                                        {`${startStr} - ${endStr}`}
+                                        <div className="text-[10px] mt-0.5">
+                                            {start ? start.format('DD/MM/YYYY') : ''}
                                         </div>
                                     </div>
-                                );
-                            }}
-
+                                </div>
+                            );
+                        }}
                         // Cores customizadas baseadas no status
                         eventDidMount={(info) => {
                             const status = info.event.extendedProps.status;
@@ -491,7 +490,7 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                 </div>
             </div>
 
-            {/* Legendas Premium */}
+            {/* Legendas Premium - ATUALIZADAS EM TEMPO REAL */}
             <div className="mt-6 flex flex-wrap gap-4 justify-center">
                 {[
                     { status: 'pendente', label: 'Pendente', color: 'bg-gradient-to-r from-yellow-500 to-yellow-600' },
