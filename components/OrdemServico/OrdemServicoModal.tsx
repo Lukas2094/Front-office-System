@@ -84,10 +84,6 @@ export default function OrdemServicoModal({ onClose, onSaved, ordem }: OrdemServ
     setLoading(true);
 
     try {
-      console.log('Form data:', form);
-      console.log('Veículos disponíveis:', veiculos);
-      console.log('Veículo selecionado ID:', form.veiculo_id);
-
       const payload = {
         ...form,
         cliente_id: Number(form.cliente_id),
@@ -95,8 +91,6 @@ export default function OrdemServicoModal({ onClose, onSaved, ordem }: OrdemServ
         funcionario_id: form.funcionario_id ? Number(form.funcionario_id) : null,
         valor_total: Number(form.valor_total),
       };
-
-      console.log('Payload enviado:', payload);
 
       if (isNaN(payload.cliente_id) || isNaN(payload.veiculo_id) || payload.veiculo_id === 0) {
         alert('Selecione cliente e veículo válidos.');

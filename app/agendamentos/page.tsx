@@ -13,9 +13,6 @@ export default async function AgendamentosPage() {
         api.get("/funcionarios", { headers: { Authorization: `Bearer ${token}` } }),
     ]);
 
-    console.log(funcionariosRes.data);
-    
-
     return (
         <Layout title="Agendamentos">
             <AgendamentosList

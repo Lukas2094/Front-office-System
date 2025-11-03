@@ -79,7 +79,7 @@ export default function UserForm({ cargos }: UserFormProps) {
                     )}
 
                     {/* Nome Completo */}
-                    {/* <div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Nome Completo *
                         </label>
@@ -96,7 +96,7 @@ export default function UserForm({ cargos }: UserFormProps) {
                                 className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* Username */}
                     <div>
@@ -119,7 +119,7 @@ export default function UserForm({ cargos }: UserFormProps) {
                     </div>
 
                     {/* Email */}
-                    {/* <div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Email *
                         </label>
@@ -136,7 +136,7 @@ export default function UserForm({ cargos }: UserFormProps) {
                                 className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                             />
                         </div>
-                    </div> */}
+                    </div>
 
                     {/* Senha */}
                     <div>
@@ -204,7 +204,7 @@ export default function UserForm({ cargos }: UserFormProps) {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r cursor-pointer from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>

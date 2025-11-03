@@ -306,7 +306,6 @@ export default function Reports() {
             });
 
             if (formato === 'json') {
-                console.log('Relatório JSON:', res.data);
                 return;
             }
 

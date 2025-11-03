@@ -31,8 +31,8 @@ export default function ClienteForm({ onClose, onCreated }: any) {
       // Simula um processamento rápido
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      // const socket = getSocket();
-      // socket.emit('createCliente', form);
+      const socket = getSocket();
+      socket.emit('createCliente', form);
       onCreated(form);
       onClose();
     } catch (error) {

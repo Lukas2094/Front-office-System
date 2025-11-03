@@ -107,10 +107,10 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
         const start = new Date(selectInfo.startStr);
         const now = new Date();
 
-        if (start < now) {
-            addToast('Só é permitido agendar a partir de agora.', 'warning');
-            return;
-        }
+        // if (start < now) {
+        //     addToast('Só é permitido agendar a partir de agora.', 'warning');
+        //     return;
+        // }
 
         setModalData({
             start: selectInfo.startStr,

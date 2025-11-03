@@ -17,10 +17,10 @@ export default function ClientesForm({ initialData }: any) {
       setClientes((prev: any) => [...prev, cliente]);
     };
 
-    socket.on('clienteCriado', handleClienteCriado);
+    // socket.on('clienteCriado', handleClienteCriado);
 
     return () => {
-      socket.off('clienteCriado', handleClienteCriado);
+      // socket.off('clienteCriado', handleClienteCriado);
       socket.disconnect();
     };
   }, []);

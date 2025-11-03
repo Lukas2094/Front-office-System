@@ -394,7 +394,7 @@ export default function OrdemServicoList({ initialData }: { initialData: OrdemSe
                         ) : (
                           <button
                             onClick={handleNovaOrdem}
-                            className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+                            className="px-6 py-2.5 bg-gradient-to-r cursor-pointer from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
                           >
                             Criar primeira OS
                           </button>
