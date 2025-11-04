@@ -490,7 +490,6 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                                 </div>
                             );
                         }}
-                        // Cores customizadas baseadas no status
                         eventDidMount={(info) => {
                             const status = info.event.extendedProps.status;
                             const colorMap = {
@@ -503,8 +502,6 @@ export default function AgendamentosList({ initialAgendamentos, initialClientes,
                             if (colorMap[status as keyof typeof colorMap]) {
                                 info.el.className += ` ${colorMap[status as keyof typeof colorMap]}`;
                             }
-
-                            // CORREÇÃO: Remove qualquer transform problemática e configura para drag
                             info.el.style.transform = 'none';
                             info.el.style.position = 'relative';
                             info.el.style.cursor = 'grab';

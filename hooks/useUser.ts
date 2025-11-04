@@ -1,3 +1,4 @@
+// hooks/useUser.ts
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -13,6 +14,13 @@ interface UserData {
     iat: number;
     exp: number;
 }
+
+// Permissões por cargo (EXATAMENTE igual ao middleware)
+const rolePermissions: Record<number, string[]> = {
+    1: ['/', '/clientes', '/ordens-servico', '/agendamentos', '/usuarios', '/relatorios'],
+    2: ['/', '/clientes', '/ordens-servico', '/agendamentos'],
+    3: ['/', '/ordens-servico']
+};
 
 export function useUser() {
     const [user, setUser] = useState<UserData | null>(null);
@@ -59,5 +67,15 @@ export function useUser() {
         window.location.href = '/login';
     };
 
-    return { user, loading, logout };
+    // Função para verificar permissões (igual ao middleware)
+    const hasPermission = (route: string): boolean => {
+        if (!user || !user.cargo_id) return false;
+
+        const allowedRoutes = rolePermissions[user.cargo_id] || [];
+        return allowedRoutes.some(allowedRoute =>
+            route === allowedRoute || route.startsWith(allowedRoute + '/')
+        );
+    };
+
+    return { user, loading, logout, hasPermission };
 }

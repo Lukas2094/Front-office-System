@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getSocket } from '@/lib/websocket';
 import { FiX, FiUser, FiUserCheck, FiMail, FiLock, FiBriefcase, FiSave, FiCheckCircle, FiEye, FiEyeOff } from 'react-icons/fi';
+import api from '@/lib/api';
 
 interface Cargo {
     id: number;
@@ -28,6 +29,24 @@ export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalPr
     const [error, setError] = useState<string | null>(null);
     const [socket, setSocket] = useState<any>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [adminExists, setAdminExists] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const checkAdminExists = async () => {
+            try {
+                const response = await api.get('/usuarios/check/admin-exists');
+                const data = await response.data;
+                setAdminExists(data.hasAdmin);
+            } catch (error) {
+                console.error('Erro ao verificar administrador:', error);
+                setAdminExists(false);
+            }
+        };
+
+        checkAdminExists();
+    }, [isOpen]);
 
     useEffect(() => {
         const s = getSocket('/usuarios');
@@ -68,6 +87,13 @@ export default function NewUserModal({ isOpen, onClose, cargos }: NewUserModalPr
         e.preventDefault();
         setLoading(true);
         setError(null);
+
+        // Verificação do cargo admin
+        if (adminExists && Number(formData.cargo_id) === 1) {
+            setError('Já existe um usuário administrador no sistema. Não é possível criar outro.');
+            setLoading(false);
+            return;
+        }
 
         if (!socket) {
             setError('WebSocket não conectado');
