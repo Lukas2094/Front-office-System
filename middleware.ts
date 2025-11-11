@@ -50,7 +50,9 @@ const rolePermissions: Record<Cargo, string[]> = {
     '/',              // Dashboard
     '/clientes',      // Clientes
     '/ordens-servico', // Ordens Serviço
-    '/agendamentos'   // Agendamentos
+    '/agendamentos',   // Agendamentos
+    '/usuarios',     // Usuários
+    '/relatorios'    // Relatórios
   ],
   [Cargo.MECANICO_FUNCIONARIO]: [
     '/',              // Dashboard

@@ -35,7 +35,7 @@ const allMenuItems: MenuItem[] = [
     // { icon: FiTruck, label: 'Veículos', href: '/veiculos', color: 'text-purple-400', roles: [1, 2, 3] },
     { icon: FiFileText, label: 'Ordens Serviço', href: '/ordens-servico', color: 'text-orange-400', roles: [1, 2, 3] },
     { icon: FiCalendar, label: 'Agendamentos', href: '/agendamentos', color: 'text-pink-400', roles: [1, 2] },
-    { icon: FiUsers, label: 'Usuários', href: '/usuarios', color: 'text-cyan-400', roles: [1] },
+    { icon: FiUsers, label: 'Usuários', href: '/usuarios', color: 'text-cyan-400', roles: [1, 2] },
     { icon: TbReportSearch, label: 'Relatórios', href: '/relatorios', color: 'text-purple-400', roles: [1, 2] },
 ];
 

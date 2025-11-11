@@ -74,12 +74,12 @@ const isValidAppointmentTime = (start: Date, end: Date): { isValid: boolean; mes
     const nowMoment = moment(now);
 
     // Verifica se está no passado
-    if (startMoment.isBefore(nowMoment)) {
-        return {
-            isValid: false,
-            message: 'Não é possível agendar em datas/horários passados.'
-        };
-    }
+    // if (startMoment.isBefore(nowMoment)) {
+    //     return {
+    //         isValid: false,
+    //         message: 'Não é possível agendar em datas/horários passados.'
+    //     };
+    // }
 
     // Verifica se é hoje
     if (isSameDay(start, now)) {
@@ -101,12 +101,12 @@ const isValidAppointmentTime = (start: Date, end: Date): { isValid: boolean; mes
     const startMinute = start.getMinutes();
     const totalStartMinutes = startHour * 60 + startMinute;
 
-    if (totalStartMinutes < 8 * 60 || totalStartMinutes >= 18 * 60) {
-        return {
-            isValid: false,
-            message: 'Agendamentos apenas permitidos no horário comercial (8:00 às 18:00).'
-        };
-    }
+    // if (totalStartMinutes < 8 * 60 || totalStartMinutes >= 18 * 60) {
+    //     return {
+    //         isValid: false,
+    //         message: 'Agendamentos apenas permitidos no horário comercial (8:00 às 18:00).'
+    //     };
+    // }
 
     // Verifica se é final de semana
     const dayOfWeek = start.getDay();
